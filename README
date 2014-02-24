@@ -1,0 +1,30 @@
+README
+======
+
+1. Create a new container to serve as the host:
+
+   `sudo lxc-create -n decc -t ubuntu`
+
+2. Start the container:
+
+   `sudo lxc-start -n decc -d`
+
+3. Now on the container we need to ensure we have some tools. Use this:
+
+   `sudo lxc-attach -n decc`
+
+4. On the container, setup ~/.ssh/authorized_keys
+   so that you can login without requiring a password for the 'ubuntu' user.
+
+5. On the container, add /etc/sudoers.d/ubuntu with
+
+   ubuntu ALL=(ALL) NOPASSWD: ALL
+
+   This ensures 'ubuntu' can sudo without requiring a password.
+
+6. On the container:
+
+   `sudo apt-get install python python-apt`
+
+
+

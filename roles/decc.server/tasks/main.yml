@@ -1,0 +1,81 @@
+---
+# tasks file for decc.server
+
+- name: Install pre-prereqs
+  apt: pkg={{ item }} state=present
+  sudo: yes
+  with_items:
+    - curl
+    - python-software-properties
+    - python-pycurl
+
+- name: Add ruby2.1 repo
+  sudo: yes
+  apt_repository: repo=ppa:brightbox/ruby-ng state=present
+
+# # sudo apt-get install python-software-properties
+# # sudo apt-add-repository ppa:brightbox/ruby-ng
+# # sudo apt-get update
+# # sudo apt-get install ruby2.1
+
+- name: Install prereqs
+  sudo: yes
+  apt: pkg={{ item }} state=present
+  with_items:
+    - build-essential
+    - git
+    - mercurial
+    - nodejs
+    - ruby2.1
+    - ruby2.1-dev
+    - ruby-ffi
+    - unzip
+
+- name: Create /opt/decc directory
+  sudo: yes
+  file: path=/opt/decc state=directory owner={{ansible_ssh_user}}
+
+- name: Checkout decc_2050_model
+  git: dest=/opt/decc/decc_2050_model repo=https://github.com/craigmj/decc_2050_model.git
+
+- name: Checkout twenty_fifty web sources
+  git: dest=/opt/decc/twenty_fifty repo=https://github.com/craigmj/twenty-fifty.git
+
+- name: Copy model.xlsx
+  copy: src=SACC.0.58.20140224.xlsx dest=/opt/decc/decc_2050_model/spreadsheet/SACC.0.58.20140224.xlsx
+
+- name: Symlink model.xlsx
+  file: >
+    state=link 
+    src=/opt/decc/decc_2050_model/spreadsheet/SACC.0.58.20140224.xlsx
+    dest=/opt/decc/decc_2050_model/spreadsheet/model.xlsx
+
+- name: Install bundle, ffi and other ruby reqs
+  sudo: yes
+  shell: gem install bundle ffi execjs therubyracer
+
+- name: Build bundle
+  sudo: yes
+  shell: >
+    chdir=/opt/decc/decc_2050_model
+    bundle
+
+- name: Bundle exec rake
+  sudo: yes
+  shell: >
+    chdir=/opt/decc/decc_2050_model
+    bundle exec rake
+
+- name: Build the gemspec
+  sudo: yes
+  shell: >
+    chdir=/opt/decc/decc_2050_model
+    gem build model.gemspec
+
+- name: Install the gemspec
+  sudo: yes
+  shell: >
+    chdir=/opt/decc/decc_2050_model
+    gem install decc_2050_za_model-0.46.20140130pre.gem
+
+
