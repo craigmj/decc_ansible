@@ -76,7 +76,7 @@
   sudo: yes
   shell: >
     chdir=/opt/decc/decc_2050_model
-    gem install decc_2050_model-0.60.20140228pre
+    gem install decc_2050_model-3.5.1pre.gem
 
 
 
