@@ -78,5 +78,17 @@
     chdir=/opt/decc/decc_2050_model
     gem install decc_2050_model-3.5.1pre.gem
 
+- name: Install rackup reqs
+  sudo: yes
+  shell: >
+    chdir=/opt/decc/twenty_fifty
+    bundle install
+
+- name: Configure decc2050 upstart config
+  sudo: yes
+  template: "src=decc2050.upstart.conf.j2 dest=/etc/init/decc2050.conf backup=no mode=0644"
+  notify: restart decc2050
+
+
 
 
