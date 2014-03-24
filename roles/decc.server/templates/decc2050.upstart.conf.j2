@@ -1,0 +1,16 @@
+# decc2050 server
+#
+description	"decc2050 server"
+
+start on (runlevel [2345])
+stop on runlevel [!2345]
+
+respawn
+expect fork
+
+script 
+  cd /opt/decc/twenty_fifty
+  exec rackup &
+end script
+
+emits decc2050_starting

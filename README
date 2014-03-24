@@ -18,7 +18,7 @@ README
 
 5. On the container, add /etc/sudoers.d/ubuntu with
 
-   ubuntu ALL=(ALL) NOPASSWD: ALL
+   ubuntu ALL=(ALL:ALL) NOPASSWD: ALL
 
    This ensures 'ubuntu' can sudo without requiring a password.
 

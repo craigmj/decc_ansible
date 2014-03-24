@@ -38,33 +38,35 @@
 - name: Checkout decc_2050_model
   git: dest=/opt/decc/decc_2050_model repo=https://github.com/craigmj/decc_2050_model.git
 
-- name: Checkout twenty_fifty web sources
-  git: dest=/opt/decc/twenty_fifty repo=https://github.com/craigmj/twenty-fifty.git
+# - name: Copy model.xlsx
+#   copy: src=SACC.0.58.20140224.xlsx dest=/opt/decc/decc_2050_model/spreadsheet/SACC.0.58.20140224.xlsx
 
-- name: Copy model.xlsx
-  copy: src=SACC.0.58.20140224.xlsx dest=/opt/decc/decc_2050_model/spreadsheet/SACC.0.58.20140224.xlsx
-
-- name: Symlink model.xlsx
-  file: >
-    state=link 
-    src=/opt/decc/decc_2050_model/spreadsheet/SACC.0.58.20140224.xlsx
-    dest=/opt/decc/decc_2050_model/spreadsheet/model.xlsx
+# - name: Symlink model.xlsx
+#   file: >
+#     state=link 
+#     src=/opt/decc/decc_2050_model/spreadsheet/SACC.0.58.20140224.xlsx
+#     dest=/opt/decc/decc_2050_model/spreadsheet/model.xlsx
 
 - name: Install bundle, ffi and other ruby reqs
   sudo: yes
-  shell: gem install bundle ffi execjs therubyracer
+  gem: name={{item}} state=present
+  with_items:
+    - bundle
+    - ffi
+    # - execjs
+    # - therubyracer
 
-- name: Build bundle
-  sudo: yes
-  shell: >
-    chdir=/opt/decc/decc_2050_model
-    bundle
+# - name: Build bundle
+#   sudo: yes
+#   shell: >
+#     chdir=/opt/decc/decc_2050_model
+#     bundle
 
-- name: Bundle exec rake
-  sudo: yes
-  shell: >
-    chdir=/opt/decc/decc_2050_model
-    bundle exec rake
+# - name: Bundle exec rake
+#   sudo: yes
+#   shell: >
+#     chdir=/opt/decc/decc_2050_model
+#     bundle exec rake
 
 - name: Build the gemspec
   sudo: yes
@@ -77,5 +79,17 @@
   shell: >
     chdir=/opt/decc/decc_2050_model
     gem install decc_2050_za_model-0.46.20140130pre.gem
+
+- name: Checkout twenty_fifty web sources
+  git: dest=/opt/decc/twenty_fifty repo=https://github.com/craigmj/twenty-fifty.git
+
+- name: Install twenty_fifty bundle
+  shell: chdir=/opt/decc/twenty_fifty bundle
+
+- name: Install decc2050 upstart script
+  sudo: yes
+  template: src=decc2050.upstart.conf.j2 dest=/etc/init/decc2050.conf
+
+
 
 
