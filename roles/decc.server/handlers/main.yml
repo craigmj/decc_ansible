@@ -1,2 +1,6 @@
 ---
 # handlers file for decc.server
+- name: restart decc2050
+  sudo: yes
+  service: name=decc2050 state=restarted
+  
