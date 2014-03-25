@@ -1,45 +1,45 @@
 ---
 # # tasks file for decc.server
-# - name: Raw install of python and python-apt
-#   raw: sudo apt-get install -y python python-apt
+- name: Raw install of python and python-apt
+  raw: sudo apt-get install -y python python-apt
 
-# - name: Install pre-prereqs
-#   apt: pkg={{ item }} state=present
-#   sudo: yes
-#   with_items:
-#     - curl
-#     - software-properties-common
-#     - python-software-properties
-#     - python-pycurl
-#     - vim
-#     - htop
+- name: Install pre-prereqs
+  apt: pkg={{ item }} state=present
+  sudo: yes
+  with_items:
+    - curl
+    - software-properties-common
+    - python-software-properties
+    - python-pycurl
+    - vim
+    - htop
 
-# - name: Add keys for ruby2.1 repo
-#   command: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C3173AA6
+- name: Add keys for ruby2.1 repo
+  command: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C3173AA6
 
-# - name: Add BrightBox ruby 2.1 repo
-#   command: sudo apt-add-repository ppa:brightbox/ruby-ng
+- name: Add BrightBox ruby 2.1 repo
+  command: sudo apt-add-repository ppa:brightbox/ruby-ng
 
-# - name: Update apt-get
-#   command: sudo apt-get update
+- name: Update apt-get
+  command: sudo apt-get update
 
-# - name: Install prereqs
-#   sudo: yes
-#   apt: pkg={{ item }} state=present
-#   with_items:
-#     - build-essential
-#     - git
-#     - mercurial
-#     - nodejs
-#     - ruby2.1
-#     - ruby2.1-dev
-#     - ruby-ffi
-#     - bundler
-#     - unzip
+- name: Install prereqs
+  sudo: yes
+  apt: pkg={{ item }} state=present
+  with_items:
+    - build-essential
+    - git
+    - mercurial
+    - nodejs
+    - ruby2.1
+    - ruby2.1-dev
+    - ruby-ffi
+    - bundler
+    - unzip
 
-# - name: Create /opt/decc directory
-#   sudo: yes
-#   file: path=/opt/decc state=directory owner={{ansible_ssh_user}}
+- name: Create /opt/decc directory
+  sudo: yes
+  file: path=/opt/decc state=directory owner={{ansible_ssh_user}}
 
 - name: Checkout decc_2050_model
   git: dest=/opt/decc/decc_2050_model repo=https://github.com/craigmj/decc_2050_model.git
@@ -53,14 +53,14 @@
 # #     src=/opt/decc/decc_2050_model/spreadsheet/{{latest_spreadsheet}}
 # #     dest=/opt/decc/decc_2050_model/spreadsheet/model.xlsx
 
-# - name: Install bundle, ffi and other ruby reqs
-#   sudo: yes
-#   gem: name={{item}} state=present
-#   with_items:
-#     - bundle
-#     - ffi
-#     # - execjs
-#     # - therubyracer
+- name: Install bundle, ffi and other ruby reqs
+  sudo: yes
+  gem: name={{item}} state=present
+  with_items:
+    - bundle
+    - ffi
+    # - execjs
+    # - therubyracer
 
 # # - name: Exec bundle for all dependencies
 # #   shell: >
@@ -91,14 +91,14 @@
     chdir=/opt/decc/decc_2050_model
     gem install `deccgem whichgem`
 
-# - name: Checkout twenty-fifty
-#   git: dest=/opt/decc/twenty-fifty repo=https://github.com/craigmj/twenty-fifty.git
+- name: Checkout twenty-fifty
+  git: dest=/opt/decc/twenty-fifty repo=https://github.com/craigmj/twenty-fifty.git
 
 - name: Setup Gemfile for twenty-fifty
   shell: chdir=/opt/decc/twenty-fifty deccgem gemfile > Gemfile
 
 - name: Clean gems
-  sudo: yes
+#  sudo: yes
   shell: chdir=/opt/decc/twenty-fifty gem clean
 
 # - name: Install twenty_fifty bundle
@@ -106,7 +106,7 @@
 #   shell: chdir=/opt/decc/twenty-fifty bundle
 
 - name: Install rackup reqs
-  sudo: yes
+#  sudo: yes
   shell: >
     chdir=/opt/decc/twenty-fifty
     bundle install
