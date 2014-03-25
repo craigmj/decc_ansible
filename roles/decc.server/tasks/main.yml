@@ -1,108 +1,122 @@
 ---
-# tasks file for decc.server
+# # tasks file for decc.server
+# - name: Raw install of python and python-apt
+#   raw: sudo apt-get install -y python python-apt
 
-- name: Install pre-prereqs
-  apt: pkg={{ item }} state=present
-  sudo: yes
-  with_items:
-    - curl
-    - python-software-properties
-    - python-pycurl
+# - name: Install pre-prereqs
+#   apt: pkg={{ item }} state=present
+#   sudo: yes
+#   with_items:
+#     - curl
+#     - software-properties-common
+#     - python-software-properties
+#     - python-pycurl
+#     - vim
+#     - htop
 
-- name: Add ruby2.1 repo
-  sudo: yes
-  apt_repository: repo=ppa:brightbox/ruby-ng state=present
+# - name: Add keys for ruby2.1 repo
+#   command: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C3173AA6
 
-# # sudo apt-get install python-software-properties
-# # sudo apt-add-repository ppa:brightbox/ruby-ng
-# # sudo apt-get update
-# # sudo apt-get install ruby2.1
+# - name: Add BrightBox ruby 2.1 repo
+#   command: sudo apt-add-repository ppa:brightbox/ruby-ng
 
-- name: Install prereqs
-  sudo: yes
-  apt: pkg={{ item }} state=present
-  with_items:
-    - build-essential
-    - git
-    - mercurial
-    - nodejs
-    - ruby2.1
-    - ruby2.1-dev
-    - ruby-ffi
-    - unzip
+# - name: Update apt-get
+#   command: sudo apt-get update
 
-- name: Create /opt/decc directory
-  sudo: yes
-  file: path=/opt/decc state=directory owner={{ansible_ssh_user}}
+# - name: Install prereqs
+#   sudo: yes
+#   apt: pkg={{ item }} state=present
+#   with_items:
+#     - build-essential
+#     - git
+#     - mercurial
+#     - nodejs
+#     - ruby2.1
+#     - ruby2.1-dev
+#     - ruby-ffi
+#     - bundler
+#     - unzip
+
+# - name: Create /opt/decc directory
+#   sudo: yes
+#   file: path=/opt/decc state=directory owner={{ansible_ssh_user}}
 
 - name: Checkout decc_2050_model
   git: dest=/opt/decc/decc_2050_model repo=https://github.com/craigmj/decc_2050_model.git
 
-# - name: Copy model.xlsx
-#   copy: src=SACC.0.58.20140224.xlsx dest=/opt/decc/decc_2050_model/spreadsheet/SACC.0.58.20140224.xlsx
+# # - name: Copy model.xlsx
+# #   copy: src={{latest_spreadsheet}} dest=/opt/decc/decc_2050_model/spreadsheet/{{latest_spreadsheet}}
 
-# - name: Symlink model.xlsx
-#   file: >
-#     state=link 
-#     src=/opt/decc/decc_2050_model/spreadsheet/SACC.0.58.20140224.xlsx
-#     dest=/opt/decc/decc_2050_model/spreadsheet/model.xlsx
+# # - name: Symlink model.xlsx
+# #   file: >
+# #     state=link 
+# #     src=/opt/decc/decc_2050_model/spreadsheet/{{latest_spreadsheet}}
+# #     dest=/opt/decc/decc_2050_model/spreadsheet/model.xlsx
 
-- name: Install bundle, ffi and other ruby reqs
-  sudo: yes
-  gem: name={{item}} state=present
-  with_items:
-    - bundle
-    - ffi
-    # - execjs
-    # - therubyracer
-
-- name: Bundle for all dependencies
-  sudo: yes
-  shell: >
-    chdir=/opt/decc/decc_2050_model
-    bundle
-
-# - name: Bundle exec rake
+# - name: Install bundle, ffi and other ruby reqs
 #   sudo: yes
-#   shell: >
-#     chdir=/opt/decc/decc_2050_model
-#     bundle exec rake
+#   gem: name={{item}} state=present
+#   with_items:
+#     - bundle
+#     - ffi
+#     # - execjs
+#     # - therubyracer
 
-- name: Build the gemspec
+# # - name: Exec bundle for all dependencies
+# #   shell: >
+# #     chdir=/opt/decc/decc_2050_model
+# #     bundle
+
+# # - name: Bundle exec rake
+# #   shell: >
+# #     chdir=/opt/decc/decc_2050_model
+# #     bundle exec rake
+
+# # - name: Build the gemspec
+# #   shell: >
+# #     chdir=/opt/decc/decc_2050_model
+# #     gem build model.gemspec
+
+- name: Install deccgem utility
   sudo: yes
-  shell: >
-    chdir=/opt/decc/decc_2050_model
-    gem build model.gemspec
+  unarchive: src=deccgem.tgz dest=/usr/bin/
+
+- name: Set mode on deccgem
+  sudo: yes
+  file: path=/usr/bin/deccgem mode=0755 state=file
 
 - name: Install the gemspec
   sudo: yes
   shell: >
     chdir=/opt/decc/decc_2050_model
-    gem install decc_2050_model-3.5.1pre.gem
+    gem install `deccgem whichgem`
+
+# - name: Checkout twenty-fifty
+#   git: dest=/opt/decc/twenty-fifty repo=https://github.com/craigmj/twenty-fifty.git
+
+- name: Setup Gemfile for twenty-fifty
+  shell: chdir=/opt/decc/twenty-fifty deccgem gemfile > Gemfile
+
+- name: Clean gems
+  sudo: yes
+  shell: chdir=/opt/decc/twenty-fifty gem clean
+
+# - name: Install twenty_fifty bundle
+#   sudo: yes
+#   shell: chdir=/opt/decc/twenty-fifty bundle
 
 - name: Install rackup reqs
   sudo: yes
   shell: >
-    chdir=/opt/decc/twenty_fifty
+    chdir=/opt/decc/twenty-fifty
     bundle install
 
 - name: Configure decc2050 upstart config
   sudo: yes
-  template: "src=decc2050.upstart.conf.j2 dest=/etc/init/decc2050.conf backup=no mode=0644"
+  template: >
+    src=decc2050.upstart.conf.j2 
+    dest=/etc/init/decc2050.conf 
+    backup=no 
+    mode=0644
   notify: restart decc2050
-
-
-
-- name: Checkout twenty_fifty web sources
-  git: dest=/opt/decc/twenty_fifty repo=https://github.com/craigmj/twenty-fifty.git
-
-- name: Install twenty_fifty bundle
-  shell: chdir=/opt/decc/twenty_fifty bundle
-
-- name: Install decc2050 upstart script
-  sudo: yes
-  template: src=decc2050.upstart.conf.j2 dest=/etc/init/decc2050.conf
-
-
-
 

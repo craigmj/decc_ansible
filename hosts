@@ -1,5 +1,6 @@
 [www]
 ;10.0.1.132 ansible_ssh_user=ubuntu
 ;192.168.0.7 ansible_ssh_user=ubuntu
-2050.lateral.co.za ansible_ssh_user=craig
+;2050.lateral.co.za ansible_ssh_user=craig
+10.0.1.95 ansible_ssh_user=ubuntu
 
