@@ -18,7 +18,7 @@
   command: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C3173AA6
 
 - name: Add BrightBox ruby 2.1 repo
-  command: sudo apt-add-repository ppa:brightbox/ruby-ng
+  command: sudo apt-add-repository -y ppa:brightbox/ruby-ng
 
 - name: Update apt-get
   command: sudo apt-get update
