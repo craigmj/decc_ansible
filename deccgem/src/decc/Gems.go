@@ -116,14 +116,18 @@ func TheDeccGem() *Gem {
 	C := make(chan *Gem)
 	go DeccGems(C)
 	for c := range C {
+		// fmt.Println("TheDeccGem: have ", g, " and received ", c)
 		if nil == g {
 			g = c
 		} else {
 			if g.EarlierThan(c) {
+				// fmt.Println(g, " EarlierThan ", c)
 				g = c
 			}
 		}
+		// fmt.Println("TDG: g=", g)
 	}
+
 	return g
 }
 
