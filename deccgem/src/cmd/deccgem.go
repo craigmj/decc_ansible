@@ -8,8 +8,7 @@ import (
 	"decc"
 )
 
-var helpText =
-`deccgem v0.0.1
+var helpText = `deccgem v0.0.1
 USAGE: deccgem CMD
 
 COMMANDS:
@@ -20,8 +19,11 @@ whichgem 	Find the latest .gem file in current directory
 
 func main() {
 	cmd := "help"
-	if 2==len(os.Args) {
+	if 2 <= len(os.Args) {
 		cmd = strings.ToLower(os.Args[1])
+		if 3 == len(os.Args) {
+			decc.SetGemCmd(os.Args[2])
+		}
 	}
 
 	switch cmd {
@@ -33,16 +35,16 @@ func main() {
 		fmt.Println(helpText)
 	case "whichgem":
 		wdir, err := os.Getwd()
-		if nil!=err {
+		if nil != err {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
 		g, err := decc.WhichGem(wdir)
-		if nil!=err {
+		if nil != err {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
-		if nil==g {
+		if nil == g {
 			fmt.Fprintln(os.Stderr, "No .gem files found")
 			os.Exit(1)
 		}
@@ -51,4 +53,3 @@ func main() {
 		decc.GemLister()
 	}
 }
-

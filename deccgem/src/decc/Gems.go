@@ -17,11 +17,17 @@ import (
 var _ = os.Stdout
 var _ = exec.Command
 
+var gemCmd = "gem2.1"
+
+func SetGemCmd(cmd string) {
+	gemCmd = cmd
+}
+
 type Gem struct {
-	Name string
+	Name    string
 	Version string
-	Lang string
-	Binary string
+	Lang    string
+	Binary  string
 }
 
 func (g *Gem) String() string {
@@ -48,9 +54,9 @@ func GemLine(out chan *Gem) error {
 }
 
 func GemList() (string, error) {
-	cmd := exec.Command("gem", "list")
+	cmd := exec.Command(gemCmd, "list")
 	output, err := cmd.Output()
-	if nil!=err {
+	if nil != err {
 		fmt.Fprintln(os.Stderr, err.Error())
 		return "", err
 	}
@@ -61,7 +67,7 @@ func GemLister() {
 
 	gems, _ := GemList()
 	for g := range NewGemReadChan(strings.NewReader(gems)) {
-		if nil!=g.Err {
+		if nil != g.Err {
 			fmt.Println("ERROR:", g.Err)
 		} else {
 			fmt.Println(g.G)
@@ -71,22 +77,22 @@ func GemLister() {
 	// lexer.DumpTokens(strings.NewReader(gems))
 }
 
-func Gems(out chan *Gem, filter func (*Gem) bool) error {
+func Gems(out chan *Gem, filter func(*Gem) bool) error {
 	defer close(out)
 	gems, _ := GemList()
-// 	gems = `
-// *** LOCAL GEMS ***
+	// 	gems = `
+	// *** LOCAL GEMS ***
 
-// bundler (1.3.5)
-// decc_2050_model (3.5.1pre, 0.71.20140319pre)
-// ffi (1.8.1)
-// net-http-persistent (2.8)
-// rdoc (3.9.4)
-// thor (0.18.1)
-// `
+	// bundler (1.3.5)
+	// decc_2050_model (3.5.1pre, 0.71.20140319pre)
+	// ffi (1.8.1)
+	// net-http-persistent (2.8)
+	// rdoc (3.9.4)
+	// thor (0.18.1)
+	// `
 
 	for g := range NewGemReadChan(strings.NewReader(gems)) {
-		if nil!=g.Err {
+		if nil != g.Err {
 			fmt.Fprintln(os.Stderr, "ERROR: ", g.Err)
 		} else {
 			if filter(g.G) {
@@ -110,11 +116,11 @@ func TheDeccGem() *Gem {
 	C := make(chan *Gem)
 	go DeccGems(C)
 	for c := range C {
-		if nil==g {
-			g=c
+		if nil == g {
+			g = c
 		} else {
 			if g.EarlierThan(c) {
-				g=c
+				g = c
 			}
 		}
 	}
