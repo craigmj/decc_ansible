@@ -3,6 +3,17 @@
 - name: Raw install of python and python-apt
   raw: sudo apt-get install -y python python-apt
 
+- name: Update apt-cache step 1
+  sudo: yes
+  apt: update_cache=yes
+
+- name: Install software-properties-common
+  sudo: yes
+  apt: pkg={{item}} state=present
+  with_items:
+    - python-software-properties
+    - software-properties-common
+
 - name: Add keys for ruby2.1 repo
   command: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C3173AA6
 
