@@ -1,9 +1,19 @@
 ---
-# # tasks file for decc.server
+# tasks file for decc.server
 - name: Raw install of python and python-apt
   raw: sudo apt-get install -y python python-apt
 
-- name: Install pre-prereqs
+- name: Add keys for ruby2.1 repo
+  command: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C3173AA6
+
+- name: Add BrightBox ruby 2.1 repo
+  command: sudo apt-add-repository -y ppa:brightbox/ruby-ng
+
+- name: Update apt-cache
+  sudo: yes
+  apt: update_cache=yes
+
+- name: Install prereqs
   apt: pkg={{ item }} state=present
   sudo: yes
   with_items:
@@ -13,20 +23,6 @@
     - python-pycurl
     - vim
     - htop
-
-- name: Add keys for ruby2.1 repo
-  command: sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C3173AA6
-
-- name: Add BrightBox ruby 2.1 repo
-  command: sudo apt-add-repository -y ppa:brightbox/ruby-ng
-
-- name: Update apt-get
-  command: sudo apt-get update
-
-- name: Install prereqs
-  sudo: yes
-  apt: pkg={{ item }} state=present
-  with_items:
     - build-essential
     - git
     - mercurial
@@ -95,11 +91,11 @@
   git: dest=/opt/decc/twenty-fifty repo=https://github.com/craigmj/twenty-fifty.git
 
 - name: Setup Gemfile for twenty-fifty
-  shell: chdir=/opt/decc/twenty-fifty deccgem gemfile > Gemfile
+  shell: chdir=/opt/decc/twenty-fifty deccgem gemfile gem > Gemfile
 
-- name: Clean gems
-#  sudo: yes
-  shell: chdir=/opt/decc/twenty-fifty gem clean
+# - name: Clean gems
+# #  sudo: yes
+#   shell: chdir=/opt/decc/twenty-fifty gem clean
 
 # - name: Install twenty_fifty bundle
 #   sudo: yes

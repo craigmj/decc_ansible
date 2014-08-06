@@ -4,6 +4,7 @@ import (
 	// "bufio"
 	"encoding/json"
 	"fmt"
+	"log"
 	"io"
 	"os"
 	"os/exec"
@@ -133,7 +134,15 @@ func TheDeccGem() *Gem {
 
 func WriteGemFile(out io.Writer) {
 	gem := TheDeccGem()
-	gemfileTemplate.Execute(out, gem)
+	if nil==gem {
+		log.Printf("Failed to get theDeccGem")
+		os.Exit(1)
+	}
+	err := gemfileTemplate.Execute(out, gem)
+	if nil!=err {
+		log.Printf(err.Error())
+		os.Exit(1)
+	}
 }
 
 var gemfileTemplate = template.Must(template.New("gemfile").Parse(`source 'http://rubygems.org'
