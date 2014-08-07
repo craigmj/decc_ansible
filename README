@@ -1,29 +1,44 @@
 README
 ======
 
-1. Create a new container to serve as the host:
+Installation on VM
+------------------
+0. Install Ansible (http://www.ansibleworks.com)
 
-   `sudo lxc-create -n decc -t ubuntu`
+1. Create a Ubuntu 14.04 VM (10.0.0.2 - any IP you like)
 
-2. Start the container:
+2. Create a user on the Ubuntu VM (let's say 'ubuntu')
 
-   `sudo lxc-start -n decc -d`
+3. Setup auto SSH login for the ubuntu user (so I can login without a password). If I'm running ubuntu I would do: `ssh-copy-id ubuntu@10.0.0.2`.
 
-3. Now on the container we need to ensure we have some tools. Use this:
+4. Login the VM, and set the user to have sudo rights without a password:
 
-   `sudo lxc-attach -n decc`
+	(my machine) ssh ubuntu@10.0.0.2
+	(should get in without a password)
+	sudo vim /etc/sudoers.d/ubuntu
+	(should start the VIM editor)
+	(add the line to the file and save)
+	ubuntu ALL=(ALL:ALL) NOPASSWD: ALL
 
-4. On the container, setup ~/.ssh/authorized_keys
-   so that you can login without requiring a password for the 'ubuntu' user.
+5. (back to own desktop) Checkout the ansible script for installation:
+   (if I'm on Linux)
+   cd ~
+   (now in my home direcotry)
+   git clone https://github.com/craigmj/decc_ansible
 
-5. On the container, add /etc/sudoers.d/ubuntu with
+6. Setup the ANSIBLE HOSTS:
+   cd decc_ansible
+   (edit the hosts file to be:)
+   [www]
+   10.0.0.2 ansible_ssh_user=ubuntu
 
-   ubuntu ALL=(ALL:ALL) NOPASSWD: ALL
+ 7. Run Ansible-playbook:
+   ANSIBLE_HOSTS=`pwd`/hosts ansible-playbook -v site.yml
 
-   This ensures 'ubuntu' can sudo without requiring a password.
-
-6. On the container:
-
+ 8. Visit the new site in your browser: http://10.0.0.2:9292/
 
 
+Installation on Linux Container
+-------------------------------
 
+Should work as above.

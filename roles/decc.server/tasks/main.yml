@@ -1,7 +1,7 @@
 ---
 # tasks file for decc.server
 - name: Raw install of python and python-apt
-  raw: sudo apt-get install -y python python-apt
+  raw: sudo apt-get install -y python python-apt-common python3-apt
 
 - name: Update apt-cache step 1
   sudo: yes
@@ -127,3 +127,6 @@
     mode=0644
   notify: restart decc2050
 
+- name: "Weirdly reinstall ffi"
+  sudo: yes
+  command: gem install ffi
