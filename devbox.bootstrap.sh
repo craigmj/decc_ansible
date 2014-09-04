@@ -37,7 +37,7 @@ gem install bundler
 bundle
 ##bundle exec rake
 gem build model.gemspec
-gem install decc_2050_model-3.5.1pre.gem
+gem install decc_2050_model-0.80.20140325pre.gem
 cd ..
 if [ ! -d twenty-fifty ]; then
 git clone https://github.com/craigmj/twenty-fifty.git
