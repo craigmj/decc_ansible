@@ -32,6 +32,8 @@ if [ ! -d decc_2050_model ]; then
  git clone https://github.com/craigmj/decc_2050_model.git
 fi
 cd decc_2050_model
+# Undo any local changes caused by build (in particular bundle exec rake)
+git revert --hard HEAD
 git pull origin master
 gem install bundler
 bundle
@@ -46,7 +48,7 @@ cd twenty-fifty
 git pull origin master
 bundle install
 
-cat <<EOUPSTART
+cat >/opt/decc/decc2050.upstart.conf <<EOUPSTART
 # decc2050 server
 #
 description     "decc2050 server"
@@ -62,5 +64,6 @@ script
 end script
 
 emits decc2050_starting
-EOUPSTART | sudo tee /etc/init.d/decc2050.conf
+EOUPSTART
+sudo mv /opt/decc/decc2050.upstart.conf /etc/init/decc2050.conf
 sudo start decc2050
