@@ -18,7 +18,7 @@ import (
 var _ = os.Stdout
 var _ = exec.Command
 
-var gemCmd = "gem2.1"
+var gemCmd = "gem"
 
 func SetGemCmd(cmd string) {
 	gemCmd = cmd
