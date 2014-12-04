@@ -1,12 +1,15 @@
 #!/bin/bash
 set -e
-
 if [ ! -f /etc/sudoers.d/`whoami` ]; then
 	echo "`whoami` ALL=(ALL:ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/`whoami`
 fi
 sudo apt-get update
 sudo apt-get install -y curl software-properties-common python-software-properties \
   python-pycurl vim htop build-essential git golang mercurial nodejs bundler unzip ruby
+
+gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
+curl -sSL https://get.rvm.io | bash -s stable --ruby
+
 # Load RVM into a shell session *as a function*
 if [[ -s "$HOME/.rvm/scripts/rvm" ]] ; then
   # First try to load from a user install
@@ -21,8 +24,8 @@ else
  source "$HOME/.rvm/scripts/rvm"
  RVMB="$HOME/.rvm/bin/rvm"
 fi
-rvm install ruby-2.1-head
-rvm use 2.1-head
+rvm install ruby-2.1.2
+rvm use 2.1.2
 if [ ! -d /opt/decc ]; then
  sudo mkdir -p /opt/decc
  sudo chown `whoami`:`whoami` /opt/decc
@@ -89,7 +92,7 @@ respawn
 expect fork
 
 script
-  sudo -u `whoami` -- /bin/bash -l -c "cd /opt/decc/twenty-fifty; rvm 2.1-head do bundle exec rackup" &
+  sudo -u `whoami` -- /bin/bash -l -c "cd /opt/decc/twenty-fifty; rvm 2.1.2 do bundle exec rackup" &
 end script
 
 emits decc2050_starting
