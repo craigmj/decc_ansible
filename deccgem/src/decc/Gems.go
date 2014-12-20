@@ -117,6 +117,7 @@ func TheDeccGem() *Gem {
 	C := make(chan *Gem)
 	go DeccGems(C)
 	for c := range C {
+		fmt.Println("# Considering gem: ", c)
 		// fmt.Println("TheDeccGem: have ", g, " and received ", c)
 		if nil == g {
 			g = c
