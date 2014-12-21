@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
+
+# Setup sudo permissions for current user, and load some general utilities we'll require
 if [ ! -f /etc/sudoers.d/`whoami` ]; then
 	echo "`whoami` ALL=(ALL:ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/`whoami`
 fi
@@ -7,10 +9,11 @@ sudo apt-get update
 sudo apt-get install -y curl software-properties-common python-software-properties \
   python-pycurl vim htop build-essential git golang mercurial nodejs bundler unzip ruby
 
+# Install rvm so that we can somehow contain ruby madness
 gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
 curl -sSL https://get.rvm.io | bash -s stable --ruby
 
-# Load RVM into a shell session *as a function*
+# Load RVM into our shell session *as a function*
 if [[ -s "$HOME/.rvm/scripts/rvm" ]] ; then
   # First try to load from a user install
   source "$HOME/.rvm/scripts/rvm"
@@ -24,17 +27,32 @@ else
  source "$HOME/.rvm/scripts/rvm"
  RVMB="$HOME/.rvm/bin/rvm"
 fi
-rvm install ruby-2.1.2
-rvm use 2.1.2
+rvm install ruby-2.1.5
+rvm use 2.1.5
+
+
+# Create directory for all decc files
 if [ ! -d /opt/decc ]; then
  sudo mkdir -p /opt/decc
  sudo chown `whoami`:`whoami` /opt/decc
 fi
 cd /opt/decc
+
+## Install the deccgem utility
+# It will add itself to /usr/bin and hence hopefully be available to all scripts
+if [ ! -d deccgem ]; then
+  git clone https://github.com/craigmj/deccgem.git
+fi
+pushd deccgem
+git pull origin master
+./build.sh
+popd
+
+# Install the decc 2050 model
 if [ ! -d decc_2050_model ]; then
  git clone https://github.com/craigmj/decc_2050_model.git
 fi
-cd decc_2050_model
+pushd decc_2050_model
 # Undo any local changes caused by build (in particular bundle exec rake)
 git reset --hard HEAD
 git pull origin master
@@ -45,16 +63,6 @@ rm -f *.gem
 gem build model.gemspec
 gem uninstall -a decc_2050_model
 gem install `ls -Rt decc_2050_model*.gem | head -1`
-cd ..
-
-## Now install the deccgem utility
-if [ ! -d decc_ansible ]; then
-	git clone https://github.com/craigmj/decc_ansible.git
-fi
-pushd decc_ansible
-git pull origin master
-cd deccgem
-
 popd
 
 ## Install the twenty-fifty system
@@ -64,19 +72,8 @@ fi
 pushd twenty-fifty
 git pull origin master
 
-if [ ! -f deccgem/deccgem ]; then
-	cd deccgem
-	GOPATH=`pwd` go build src/cmd/deccgem.go
-	sudo rm -f /usr/bin/deccgem
-	sudo rm -f /usr/local/bin/deccgem
-	if [ ! -f /usr/bin/deccgem ]; then
-	  sudo ln -s `pwd`/deccgem /usr/local/bin
-	fi
-	cd ..
-fi
-
 rm -f Gemfile.lock
-deccgem/deccgem gemfile > Gemfile
+deccgem gemfile > Gemfile
 bundle install
 
 if [ ! -f /etc/init/decc2050.conf ]; then
@@ -91,15 +88,17 @@ stop on runlevel [!2345]
 respawn
 expect fork
 
+setuid `whoami`
 script
-  sudo -u `whoami` -- /bin/bash -l -c "cd /opt/decc/twenty-fifty; rvm 2.1.2 do bundle exec rackup" &
+  chdir /opt/decc/twenty-fifty
+  rvm 2.1.5 do bundle exec rackup -o 0.0.0.0 &
 end script
 
 emits decc2050_starting
 EOUPSTART
 
-  sudo start decc2050
+  sudo service decc2050 start
 else
-  sudo restart decc2050
+  sudo service decc2050 restart
 fi
 popd
